@@ -1,0 +1,53 @@
+
+class Node:
+    def __init__(self, char, frequency):
+        self.char = char
+        self.frequency = frequency
+        self.left = None
+        self.right = None
+
+    def __lt__(self, other):
+        return self.frequency < other.frequency
+
+def build_huffman_tree(data):
+    frequency = defaultdict(int)
+    for char in data:
+        frequency[char] += 1
+
+    heap = [Node(char, freq) for char, freq in frequency.items()]
+    heapq.heapify(heap)
+
+    while len(heap) > 1:
+        left_child = heapq.heappop(heap)
+        right_child = heapq.heappop(heap)
+
+        merged_node = Node(None, left_child.frequency + right_child.frequency)
+        merged_node.left = left_child
+        merged_node.right = right_child
+
+        heapq.heappush(heap, merged_node)
+
+    return heap[0]
+
+def build_huffman_codes(root, current_code="", codes=None):
+    if codes is None:
+        codes = {}
+
+    if root is not None:
+        if root.char is not None:
+            codes[root.char] = current_code
+        build_huffman_codes(root.left, current_code + "0", codes)
+        build_huffman_codes(root.right, current_code + "1", codes)
+
+    return codes
+
+def huffman_encode(data):
+    if not data:
+        return None
+
+    root = build_huffman_tree(data)
+    codes = build_huffman_codes(root)
+
+    encoded_data = ''.join([codes[char] for char in data])
+    return encoded_data
+
